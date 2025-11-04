@@ -34,15 +34,31 @@ def createDB():
 @app.route('/pass/accessDB', methods=['POST'])
 def accessDB():
     data=request.json
-    with open(f'{data['name']}.xpdb','r') as encFile:
-        decData=encFile.read()
-        encData=encrypt.encryptData(key,decData)
-        with open(f'{data['name']}.db','wb') as tempFile:
-            tempFile.write(encData)
+    with open(f'{data['name']}.xpdb','rb') as encFile:
+        encData=encFile.read()
+        decData=encrypt.decryptData(key,encData)
+        with open(f'{data['name']}.db','wb+') as tempFile:
+            tempFile.write(decData)
     os.remove(f'{data['name']}.xpdb')
     global con
     con=passmgr.accessDB(data['name'])
     return jsonify({'status':'success'}), 201
+
+@app.route('/pass/createGroup',methods=['POST'])
+def createGroup():
+    data=request.json
+    groupName=data['group-name']
+    res=passmgr.createGroup(groupName,con)
+    if res:
+        return jsonify({'status':'success'}),201
+
+@app.route('/pass/viewGroup',methods=['POST'])
+def viewGroup():
+    data=request.json
+    groupName=data['group-name']
+    res=passmgr.viewGroup(groupName,con)
+    return jsonify({'data':res}),201
+
 
 if __name__=='__main__':
     app.run(debug=True)
