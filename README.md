@@ -1,4 +1,4 @@
-[#](#.md) pyvault
+# pyvault
 Password manager, encrypted notepad and easy file encryption. 
 
 Features implemented so far:
