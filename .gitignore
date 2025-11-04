@@ -1,1 +1,5 @@
+*.key
+*.db
+*.xas
+*.xpdb
 __pycache__/

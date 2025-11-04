@@ -1,15 +1,16 @@
 from cryptography.fernet import Fernet
 
-def generateKey(fileName):
+def generateKey():
     key = Fernet.generate_key()
-    with open(f'{fileName}.key','wb') as f:
+    with open(f'pyvault.key','wb') as f:
         f.write(key)
     return
 
-def readKey(filePath):
+def readKey():
     try:
-        with open(f'filePath', 'rb') as f:
-            return Fernet(f.read())
+        with open('pyvault.key', 'rb') as f:
+            key=Fernet(f.read())
+            return key
     except:
         return "No file found. Try again."
 

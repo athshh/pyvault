@@ -18,7 +18,7 @@ def generatePassword(length, digits, letters, special):
 
 
 def createDB(DBName):
-    con=sql.connect(f'{DBName}')
+    con=sql.connect(f'{DBName}.db')
     cur=con.cursor()
     cur.execute("CREATE TABLE main(ID INTEGER PRIMARY KEY AUTOINCREMENT, service VARCHAR(255),loginID VARCHAR(255),loginPass VARCHAR(255))")
     con.commit()
