@@ -3,3 +3,4 @@
 *.xas
 *.xpdb
 __pycache__/
+apitest.py

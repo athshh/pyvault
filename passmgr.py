@@ -23,26 +23,25 @@ def createDB(DBName):
     con.commit()
     return 1
 
-def accessDB(DBName):
+def accessDB():
     try:
-        con=sql.connect(f'{DBName}')
+        con=sql.connect(':memory:',check_same_thread=False)
         return con
     except:
-        return f"Database {DBName} not found."
+        return f"Database not found."
 
-def createGroup(groupName,connection):
-    cursor=connection.cursor()
+def createGroup(groupName,connection,cursor):
+    
     cursor.execute(f"CREATE TABLE {groupName}(ID INTEGER PRIMARY KEY AUTOINCREMENT, service VARCHAR(255), loginID VARCHAR(255), loginPass VARCHAR(255))")
     connection.commit()
     return 1
 
-def viewGroup(groupName, connection):
-    cursor=connection.cursor()
+def viewGroup(groupName,cursor):
     res=cursor.execute(f"SELECT * FROM {groupName}")
     return res.fetchall()
 
-def deleteGroup(groupName, connection):
-    cursor=connection.cursor()
+def deleteGroup(groupName, connection,cursor):
+    
     try:
         cursor.execute(f"DROP TABLE {groupName}")
         connection.commit()
@@ -50,25 +49,25 @@ def deleteGroup(groupName, connection):
     except:
         return f"Table {groupName} not found."
 
-def createEntry(groupName, service, loginID, loginPass, connection):
-    cursor=connection.cursor()
+def createEntry(groupName, service, loginID, loginPass, connection,cursor):
+    
     cursor.execute(f"INSERT INTO {groupName} (service, loginID, loginPass) VALUES (?, ?, ?)",(service,loginID,loginPass))
     connection.commit()
     return 1
 
-def viewEntry(groupName, service, connection):
-    cursor=connection.cursor()
+def viewEntry(groupName, service, connection,cursor):
+    
     res=cursor.execute(f"SELECT * FROM {groupName} WHERE service=?",(service,))
     return res.fetchone()
 
-def updateEntry(groupName, service, loginID, loginPass,ID, connection):
-    cursor=connection.cursor()
+def updateEntry(groupName, service, loginID, loginPass,ID, connection,cursor):
+    
     cursor.execute(f"UPDATE {groupName} SET service=?, loginID=?, loginPass=? WHERE ID=?",(service, loginID, loginPass,ID))
     connection.commit()
     return 1
 
-def deleteEntry(ID,groupName, connection):
-    cursor=connection.cursor()
+def deleteEntry(ID,groupName, connection,cursor):
+    
     cursor.execute(f"DELETE FROM {groupName} WHERE ID=?",(ID,))
     connection.commit()
     return 1
