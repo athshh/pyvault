@@ -11,6 +11,8 @@ cur=0
 key=0
 db=0
 
+# TODO: add password-based keygen and access
+
 @app.route('/generateKey',methods=['GET'])
 def generateKey():
     encrypt.generateKey()
@@ -22,8 +24,13 @@ def accessKey():
     key=encrypt.readKey()
     return jsonify({'status':'success'}),201
 
+def checkKey():
+    return key != 0
+
 @app.route('/pass/createDB', methods=['POST'])
 def createDB():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     passmgr.createDB(f"{data['name']}.db")
     with open(f"{data['name']}.db",'rb') as dbFile:
@@ -36,6 +43,8 @@ def createDB():
 
 @app.route('/pass/accessDB', methods=['POST'])
 def accessDB():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     temp_path = f"{data['name']}_temp.db" # Added temp path for bridge
     with open(f"{data['name']}.xpdb",'rb') as encFile:
@@ -59,6 +68,8 @@ def accessDB():
 
 @app.route('/pass/closeDB',methods=['POST'])
 def closeDB():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     temp_path = f"{data['name']}_save.db" # Added temp path for saving
     global con,cur,db
@@ -87,6 +98,8 @@ def closeDB():
 
 @app.route('/pass/createGroup',methods=['POST'])
 def createGroup():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     res=passmgr.createGroup(groupName,con,cur)
@@ -95,11 +108,66 @@ def createGroup():
 
 @app.route('/pass/viewGroup',methods=['POST'])
 def viewGroup():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     res=passmgr.viewGroup(groupName,cur)
     return jsonify({'data':res}),201
 
+@app.route('/pass/deleteGroup',methods=['POST'])
+def deleteGroup():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
+    data=request.json
+    groupName=data['group-name']
+    res=passmgr.deleteGroup(groupName,con,cur)
+    return jsonify({'data':res}),201
+
+@app.route('/pass/createEntry',methods=['POST'])
+def createEntry():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
+    data=request.json
+    groupName=data['group-name']
+    serviceName=data['service']
+    loginID=data['loginID']
+    loginPassword=data['loginPassword']
+    res=passmgr.createEntry(groupName,serviceName,loginID,loginPassword,con,cur)
+    return jsonify({'data':res}),201
+
+@app.route('/pass/viewEntry',methods=['POST'])
+def viewEntry():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
+    data=request.json
+    groupName=data['group-name']
+    serviceName=data['service']
+    res=passmgr.viewEntry(groupName,serviceName,con,cur)
+    return jsonify({'data':res}),201
+
+@app.route('/pass/updateEntry',methods=['POST'])
+def updateEntry():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
+    data=request.json
+    entryID=data['entryID']
+    groupName=data['group-name']
+    serviceName=data['service']
+    loginID=data['loginID']
+    loginPassword=data['loginPassword']
+    res=passmgr.updateEntry(groupName,serviceName,loginID,loginPassword,entryID,con,cur)
+    return jsonify({'data':res}),201
+
+@app.route('/pass/deleteEntry',methods=['POST'])
+def deleteEntry():
+    if not checkKey():
+        return jsonify({'error':'no valid key loaded'}),400
+    data=request.json
+    groupName=data['group-name']
+    entryID=data['entryID']
+    res=passmgr.deleteEntry(entryID,groupName,con,cur)
+    return jsonify({'data':res}),201
 
 if __name__=='__main__':
     app.run(debug=True)
