@@ -4,11 +4,12 @@ def generateKey():
     key = Fernet.generate_key()
     with open(f'pyvault.key','wb') as f:
         f.write(key)
+        f.close()
     return
 
-def readKey():
+def readKey(filepath):
     try:
-        with open('pyvault.key', 'rb') as f:
+        with open(filepath, 'rb') as f:
             key=Fernet(f.read())
             return key
     except:

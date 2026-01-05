@@ -8,7 +8,6 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 con=0
 cur=0
-key=0
 db=0
 
 # TODO: add password-based keygen and access
@@ -18,24 +17,20 @@ def generateKey():
     encrypt.generateKey()
     return jsonify({'hello':'world'}),201
 
-@app.route('/accessKey',methods=['GET'])
-def accessKey():
-    global key
-    key=encrypt.readKey()
-    return jsonify({'status':'success'}),201
+#@app.route('/accessKey',methods=['GET'])
+#def accessKey():
+#    global key
+#    key=encrypt.readKey()
+#    return jsonify({'status':'success'}),201
 
-def checkKey():
-    return key != 0
 
 @app.route('/pass/createDB', methods=['POST'])
 def createDB():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     passmgr.createDB(f"{data['name']}.db")
     with open(f"{data['name']}.db",'rb') as dbFile:
         decData=dbFile.read()
-        encData=encrypt.encryptData(key,decData)
+        encData=encrypt.encryptData(data['key'],decData)
         with open(f"{data['name']}.xpdb",'wb+') as tempFile:
             tempFile.write(encData)
     os.remove(f"{data['name']}.db")
@@ -43,13 +38,11 @@ def createDB():
 
 @app.route('/pass/accessDB', methods=['POST'])
 def accessDB():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     temp_path = f"{data['name']}_temp.db" # Added temp path for bridge
     with open(f"{data['name']}.xpdb",'rb') as encFile:
         encData=encFile.read()
-        decData=encrypt.decryptData(key,encData)
+        decData=encrypt.decryptData(data['key'],encData)
     
     with open(temp_path, 'wb') as f: # Write decrypted bytes to temp file
         f.write(decData)
@@ -68,8 +61,6 @@ def accessDB():
 
 @app.route('/pass/closeDB',methods=['POST'])
 def closeDB():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     temp_path = f"{data['name']}_save.db" # Added temp path for saving
     global con,cur,db
@@ -84,7 +75,7 @@ def closeDB():
         decData = f.read()
         
     with open(f"{data['name']}.xpdb",'wb') as encFile:
-        encData = encrypt.encryptData(key, decData) # Encrypt the bytes
+        encData = encrypt.encryptData(data['key'], decData) # Encrypt the bytes
         encFile.write(encData)
         db=0
         
@@ -98,8 +89,6 @@ def closeDB():
 
 @app.route('/pass/createGroup',methods=['POST'])
 def createGroup():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     res=passmgr.createGroup(groupName,con,cur)
@@ -108,8 +97,6 @@ def createGroup():
 
 @app.route('/pass/viewGroup',methods=['POST'])
 def viewGroup():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     res=passmgr.viewGroup(groupName,cur)
@@ -117,8 +104,6 @@ def viewGroup():
 
 @app.route('/pass/deleteGroup',methods=['POST'])
 def deleteGroup():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     res=passmgr.deleteGroup(groupName,con,cur)
@@ -126,8 +111,6 @@ def deleteGroup():
 
 @app.route('/pass/createEntry',methods=['POST'])
 def createEntry():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     serviceName=data['service']
@@ -138,8 +121,6 @@ def createEntry():
 
 @app.route('/pass/viewEntry',methods=['POST'])
 def viewEntry():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     serviceName=data['service']
@@ -148,8 +129,6 @@ def viewEntry():
 
 @app.route('/pass/updateEntry',methods=['POST'])
 def updateEntry():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     entryID=data['entryID']
     groupName=data['group-name']
@@ -161,8 +140,6 @@ def updateEntry():
 
 @app.route('/pass/deleteEntry',methods=['POST'])
 def deleteEntry():
-    if not checkKey():
-        return jsonify({'error':'no valid key loaded'}),400
     data=request.json
     groupName=data['group-name']
     entryID=data['entryID']
